@@ -11,7 +11,22 @@ public class Usuario {
     private String dataDeNascimento;
     private int idUsuario;
 
-    public Usuario(String nome, String email, String senha, String dataDeNascimento, int idUsuario) {
+    public Usuario() {
+    }
+
+    public Usuario(String email, String senha) {
+        this.email = email;
+        this.senha = senha;
+    }
+
+    public Usuario(String nome, String email, String senha, String dataDeNascimento) {
+        this.nome = nome;
+        this.email = email;
+        this.senha = senha;
+        this.dataDeNascimento = dataDeNascimento;
+    }
+
+    public Usuario(String nome, String email, String senha) {
         this.nome = nome;
         this.email = email;
         this.senha = senha;
@@ -68,7 +83,7 @@ public class Usuario {
                 statement.setString(2, senha);
                 try (ResultSet resultado = statement.executeQuery()) {
                     if (resultado.next()) {
-                        this.idUsuario = resultado.getInt("ID_USUARIO");
+                        this.idUsuario = resultado.getInt("COD_USUARIO");
                         this.nome = resultado.getString("NOM_USUARIO");
                         this.email = resultado.getString("DES_EMAIL");
                         this.senha = resultado.getString("DES_SENHA");
@@ -86,10 +101,10 @@ public class Usuario {
     }
 
     // Método para realizar o registro
-    public boolean fazerRegistro(String email, String senha, String nome, String dataDeNascimento) {
+    public boolean fazerRegistro(String email, String senha, String nome) {
         Database bancoDeDados = new Database();
         try (Connection conexao = bancoDeDados.conectar()) {
-            String query = "INSERT INTO usuario (ID_USUARIO, NOM_USUARIO, DES_EMAIL, DES_SENHA, DATA_NASCIMENTO) VALUES (?, ?, ?, ?, ?)";
+            String query = "INSERT INTO usuario (COD_USUARIO, NOM_USUARIO, DES_EMAIL, DES_SENHA, DATA_NASCIMENTO) VALUES (?, ?, ?, ?, ?)";
             try (PreparedStatement statement = conexao.prepareStatement(query)) {
                 statement.setLong(1, idUsuario);
                 statement.setString(2, nome);
@@ -110,7 +125,7 @@ public class Usuario {
     public void adicionarAmigo(long codAmigo) {
         Database bancoDeDados = new Database();
         try (Connection conexao = bancoDeDados.conectar()) {
-            String query = "INSERT INTO amigo (ID_USUARIO, ID_AMIGO) VALUES (?, ?)";
+            String query = "INSERT INTO amigo (COD_USUARIO, ID_AMIGO) VALUES (?, ?)";
             try (PreparedStatement statement = conexao.prepareStatement(query)) {
                 statement.setLong(1, this.idUsuario);
                 statement.setLong(2, codAmigo);
@@ -142,9 +157,7 @@ public class Usuario {
             while (resultado.next()) {
                 int codAmigo = resultado.getInt("COD_USUARIO");
                 String nomeAmigo = resultado.getString("NOM_USUARIO");
-
-                // Criar um objeto Usuario diretamente sem a necessidade do método getUsuarioByCod
-                Usuario amigo = new Usuario();
+                Usuario amigo = new Usuario("Nome", "Email", "Senha");
                 amigo.setCOD_USUARIO(codAmigo);
                 amigo.setNOM_USUARIO(nomeAmigo);
 
@@ -169,7 +182,7 @@ public class Usuario {
         boolean sucesso = false;
 
         try (Connection conexao = bancoDeDados.conectar()) {
-            String query = "DELETE FROM amigo WHERE (ID_USUARIO = ? AND ID_AMIGO = ?) OR (ID_USUARIO = ? AND ID_AMIGO = ?)";
+            String query = "DELETE FROM amigo WHERE (COD_USUARIO = ? AND ID_AMIGO = ?) OR (COD_USUARIO = ? AND ID_AMIGO = ?)";
             try (PreparedStatement statement = conexao.prepareStatement(query)) {
                 statement.setLong(1, this.idUsuario);
                 statement.setLong(2, codAmigo);
@@ -197,7 +210,7 @@ public class Usuario {
         boolean saoAmigos = false;
 
         try (Connection conexao = bancoDeDados.conectar()) {
-            String query = "SELECT COUNT(1) FROM amigo WHERE (ID_USUARIO = ? AND ID_AMIGO = ?) OR (ID_USUARIO = ? AND ID_AMIGO = ?)";
+            String query = "SELECT COUNT(1) FROM amigo WHERE (COD_USUARIO = ? AND ID_AMIGO = ?) OR (COD_USUARIO = ? AND ID_AMIGO = ?)";
             try (PreparedStatement statement = conexao.prepareStatement(query)) {
                 statement.setLong(1, this.idUsuario);
                 statement.setLong(2, codAmigo);
@@ -217,14 +230,13 @@ public class Usuario {
         return saoAmigos;
     }
 
-    // Primeiro, verificamos se a amizade existe
     // Método privado para verificar se dois usuários são amigos
-        private boolean saoAmigos(long codAmigo) {
+        private boolean saoAmigos2(long codAmigo) {
             Database bancoDeDados = new Database();
             boolean saoAmigos = false;
 
             try (Connection conexao = Database.conectar()) {
-                String query = "SELECT COUNT(1) FROM amigo WHERE (ID_USUARIO = ? AND ID_AMIGO = ?) OR (ID_USUARIO = ? AND ID_AMIGO = ?)";
+                String query = "SELECT COUNT(1) FROM amigo WHERE (COD_USUARIO = ? AND ID_AMIGO = ?) OR (COD_USUARIO = ? AND ID_AMIGO = ?)";
                 try (PreparedStatement statement = conexao.prepareStatement(query)) {
                     statement.setLong(1, this.idUsuario);
                     statement.setLong(2, codAmigo);
